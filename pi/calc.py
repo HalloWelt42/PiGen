@@ -1,6 +1,5 @@
 import os
 import json
-import decimal
 from decimal import Decimal, getcontext
 import itertools
 import signal
@@ -9,8 +8,9 @@ import sys
 CHECKPOINT_FILE = "pi_checkpoint.json"
 OUTPUT_FILE = "pi_output.txt"
 BLOCK_SIZE = 100  # Ziffern pro Schreibvorgang
+MAX_DIGITS = 200_000
 
-
+# Die Konstante `CHECKPOINT_FILE` definiert den Dateinamen für den Checkpoint.
 def load_checkpoint():
     if os.path.exists(CHECKPOINT_FILE):
         with open(CHECKPOINT_FILE, "r") as f:
@@ -23,7 +23,7 @@ def load_checkpoint():
     getcontext().prec = initial_prec + 2
     return 0, Decimal(0), 0
 
-
+# Die Funktion `load_checkpoint` lädt den letzten Zustand aus einer JSON-Datei.
 def save_checkpoint(k, pi_sum, digits_written):
     state = {
         "k": k,
@@ -34,7 +34,7 @@ def save_checkpoint(k, pi_sum, digits_written):
     with open(CHECKPOINT_FILE, "w") as f:
         json.dump(state, f)
 
-
+# Die Funktion `save_checkpoint` speichert den aktuellen Zustand in einer JSON-Datei.
 def chudnovsky_term(k):
     from math import factorial
     num = Decimal(factorial(6 * k)) * (13591409 + 545140134 * k)
@@ -42,15 +42,13 @@ def chudnovsky_term(k):
     term = num / den
     return term if (k % 2 == 0) else -term
 
-
+# Die Funktion `chudnovsky_term` berechnet den k-ten Term der Chudnovsky-Formel.
 def compute_pi(pi_sum):
     return (Decimal(426880) * Decimal(10005).sqrt()) / pi_sum
 
-
+# Die Funktion `compute_pi` berechnet die Zahl Pi mit der Chudnovsky-Formel.
 def main():
     k, pi_sum, digits_written = load_checkpoint()
-    # Maximale Anzahl an Ziffern festlegen
-    MAX_DIGITS = 1_000_000  # Hier kannst du die Grenze anpassen
 
     # Wenn Output-Datei nicht existiert, schreibe "3." und beginne mit Zählung ab 0
     if not os.path.exists(OUTPUT_FILE):
