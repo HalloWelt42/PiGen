@@ -8,9 +8,8 @@ import sys
 CHECKPOINT_FILE = "pi_checkpoint.json"
 OUTPUT_FILE = "pi_output.txt"
 BLOCK_SIZE = 100  # Ziffern pro Schreibvorgang
-MAX_DIGITS = 200_000
+MAX_DIGITS = 100_000 # Berechnungsgrenze festlegen
 
-# Die Konstante `CHECKPOINT_FILE` definiert den Dateinamen für den Checkpoint.
 def load_checkpoint():
     if os.path.exists(CHECKPOINT_FILE):
         with open(CHECKPOINT_FILE, "r") as f:
@@ -23,7 +22,6 @@ def load_checkpoint():
     getcontext().prec = initial_prec + 2
     return 0, Decimal(0), 0
 
-# Die Funktion `load_checkpoint` lädt den letzten Zustand aus einer JSON-Datei.
 def save_checkpoint(k, pi_sum, digits_written):
     state = {
         "k": k,
@@ -34,7 +32,6 @@ def save_checkpoint(k, pi_sum, digits_written):
     with open(CHECKPOINT_FILE, "w") as f:
         json.dump(state, f)
 
-# Die Funktion `save_checkpoint` speichert den aktuellen Zustand in einer JSON-Datei.
 def chudnovsky_term(k):
     from math import factorial
     num = Decimal(factorial(6 * k)) * (13591409 + 545140134 * k)
@@ -42,11 +39,10 @@ def chudnovsky_term(k):
     term = num / den
     return term if (k % 2 == 0) else -term
 
-# Die Funktion `chudnovsky_term` berechnet den k-ten Term der Chudnovsky-Formel.
 def compute_pi(pi_sum):
     return (Decimal(426880) * Decimal(10005).sqrt()) / pi_sum
 
-# Die Funktion `compute_pi` berechnet die Zahl Pi mit der Chudnovsky-Formel.
+# Die Funktion berechnet die Zahl Pi mit der Chudnovsky-Formel.
 def main():
     k, pi_sum, digits_written = load_checkpoint()
 
@@ -73,7 +69,7 @@ def main():
 
     for k in itertools.count(start=k):
         if digits_written >= MAX_DIGITS:
-            print(f"Maximale Anzahl von {MAX_DIGITS} Ziffern erreicht. Beende…")
+            print(f"\nMaximale Anzahl von {MAX_DIGITS} Ziffern erreicht. Beende…")
             save_checkpoint(k, pi_sum, digits_written)
             break
 
@@ -91,14 +87,14 @@ def main():
 
         decimal_part = pi_str.split('.')[1]
 
-        # Wenn genug neue Ziffern vorliegen
+        # Wenn genug neue Ziffern vorliegen → in Datei schreiben
         if len(decimal_part) >= digits_written + BLOCK_SIZE:
             next_block = decimal_part[digits_written: digits_written + BLOCK_SIZE]
             with open(OUTPUT_FILE, "a") as f:
                 f.write(next_block)
             digits_written += len(next_block)
             save_checkpoint(k + 1, pi_sum, digits_written)
-            print(f"Angehängt: {len(next_block)} Ziffern → insgesamt {digits_written}")
+            print(f"\rAngehängt: {len(next_block)} Ziffern → insgesamt {digits_written} von {MAX_DIGITS}",end='',flush=True)
 
 
 if __name__ == "__main__":
