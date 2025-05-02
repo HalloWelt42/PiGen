@@ -49,6 +49,8 @@ def compute_pi(pi_sum):
 
 def main():
     k, pi_sum, digits_written = load_checkpoint()
+    # Maximale Anzahl an Ziffern festlegen
+    MAX_DIGITS = 1_000_000  # Hier kannst du die Grenze anpassen
 
     # Wenn Output-Datei nicht existiert, schreibe "3." und beginne mit Zählung ab 0
     if not os.path.exists(OUTPUT_FILE):
@@ -72,6 +74,11 @@ def main():
     signal.signal(signal.SIGINT, handler)
 
     for k in itertools.count(start=k):
+        if digits_written >= MAX_DIGITS:
+            print(f"Maximale Anzahl von {MAX_DIGITS} Ziffern erreicht. Beende…")
+            save_checkpoint(k, pi_sum, digits_written)
+            break
+
         pi_sum += chudnovsky_term(k)
 
         # Präzision bei Bedarf erhöhen
